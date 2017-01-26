@@ -33,7 +33,7 @@ namespace OktaDemoCustomerWebsite.Controllers
             CheckSession(sessionResponse, loginModel);
 
             if (loginModel.IsAuthenticated) {
-                return Redirect("https://recinto.oktapreview.com/oauth2/aus9d9b7z6YAegbPh0h7/v1/authorize?response_type=code&client_id=4KsoT6lnBL9bOPqBFhMv&redirect_uri=http://localhost:59142/Home/AuthCode&scope=Read&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj&sessionToken=" + sessionResponse.Id);
+                return Redirect(RESTUtil.GetAuthorizationURL(sessionResponse.Id));
             } else {
                 return View(loginModel);
             }
@@ -46,7 +46,7 @@ namespace OktaDemoCustomerWebsite.Controllers
             OktaSessionResponse oktaSession = (OktaSessionResponse)Session[RESTUtil.OKTA_SESSION];
             CheckSession(oktaSession, response);
 
-            String oAuthTokenUrl = "https://recinto.oktapreview.com/oauth2/aus9d9b7z6YAegbPh0h7/v1/token?grant_type=authorization_code&code=" + oidcCode + "&redirect_uri=http://localhost:59142/Home/AuthCode";
+            String oAuthTokenUrl = RESTUtil.GetTokenURL(oidcCode);
 
             ViewBag.OidcRedirectUrl = oAuthTokenUrl;
 

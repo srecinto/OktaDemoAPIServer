@@ -18,7 +18,6 @@ namespace OktaDemoAPIServer.Utils {
         private static String oktaApiKey;
         private static String oktaOAuthIssuerId;
         private static String oktaOAuthClientId;
-        private static String oktaOAuthRedirectUri;
         private static String oktaOAuthHeaderAuth;
         private static HttpClient client = new HttpClient();
 
@@ -27,7 +26,6 @@ namespace OktaDemoAPIServer.Utils {
             oktaApiKey = WebConfigurationManager.AppSettings["okta:ApiKey"];
             oktaOAuthIssuerId = WebConfigurationManager.AppSettings["okta:OAuthIssuerId"];
             oktaOAuthClientId = WebConfigurationManager.AppSettings["okta:OAuthClientId"];
-            oktaOAuthRedirectUri = WebConfigurationManager.AppSettings["okta:OAuthRedirectUri"];
 
             String oktaOAuthSecret = WebConfigurationManager.AppSettings["okta:OAuthSecret"];
 
@@ -41,35 +39,47 @@ namespace OktaDemoAPIServer.Utils {
         /// </summary>
         /// <returns>Array of Customer objects</returns>
         public static Customer[] GetAllCustomers() {
-            return GetObjectsFromAPI<Customer>(HttpMethod.Get, "https://" + oktaOrg + "/api/v1/users?filter=status eq \"ACTIVE\"&limit=100");
+            return GetObjectsFromAPI<Customer>(HttpMethod.Get, 
+                String.Format("https://{0}/api/v1/users?filter=status eq \"ACTIVE\"&limit=100", oktaOrg));
         }
 
         public static Customer GetCustomerById(String customerId) {
-            return GetObjectFromAPI<Customer>(HttpMethod.Get, "https://" + oktaOrg + "/api/v1/users/" + customerId);
+            return GetObjectFromAPI<Customer>(HttpMethod.Get, 
+                String.Format("https://{0}/api/v1/users/{1}", oktaOrg, customerId));
         }
 
         public static Customer AddNewCustomer(Customer newCustomer) {
-            Customer customer = GetObjectFromAPI<Customer>(HttpMethod.Post, "https://" + oktaOrg + "/api/v1/users?activate=true", newCustomer);
+            Customer customer = GetObjectFromAPI<Customer>(HttpMethod.Post, 
+                String.Format("https://{0}/api/v1/users?activate=true", oktaOrg), newCustomer);
 
             return customer;
         }
 
         public static Customer UpdateCustomer(String Id, Customer customer) {
             //NOTE: a partial update from Okta requires a POST not a Put... a full update would require a Put
-            Customer result = GetObjectFromAPI<Customer>(HttpMethod.Post, "https://" + oktaOrg + "/api/v1/users/" + Id, customer);
+            Customer result = GetObjectFromAPI<Customer>(HttpMethod.Post, 
+                String.Format("https://{0}/api/v1/users/{1}", oktaOrg, Id), customer);
 
             return result;
         }
 
         public static OktaSessionResponse GetSession(Authentication authentication) {
-            AuthenticationResponse authResponse = GetObjectFromAPI<AuthenticationResponse>(HttpMethod.Post, "https://" + oktaOrg + "/api/v1/authn", authentication);
-            OktaSessionResponse sess = GetObjectFromAPI<OktaSessionResponse>(HttpMethod.Post, "https://" + oktaOrg + "/api/v1/sessions?additionalFields=cookieToken", authResponse);
+            AuthenticationResponse authResponse = GetObjectFromAPI<AuthenticationResponse>(HttpMethod.Post, String.Format("https://{0}/api/v1/authn", oktaOrg), authentication);
+            OktaSessionResponse sess = GetObjectFromAPI<OktaSessionResponse>(HttpMethod.Post, 
+                String.Format("https://{0}/api/v1/sessions?additionalFields=cookieToken", oktaOrg), 
+                authResponse);
 
             return sess;
         }
 
         public static TokenIntrospectionResponse IntrospectToken(String token) {
-            TokenIntrospectionResponse introspectionResponse = GetObjectFromAPI<TokenIntrospectionResponse>(HttpMethod.Post, "https://" + oktaOrg + "/oauth2/aus9d9b7z6YAegbPh0h7/v1/introspect?token=" + token + "&token_type_hint=access_token", oktaOAuthHeaderAuth);
+            TokenIntrospectionResponse introspectionResponse = GetObjectFromAPI<TokenIntrospectionResponse>(
+                HttpMethod.Post, 
+                String.Format("https://{0}/oauth2/{1}/v1/introspect?token={2}&token_type_hint=access_token", 
+                              oktaOrg, 
+                              oktaOAuthIssuerId, 
+                              token), 
+                oktaOAuthHeaderAuth);
             return introspectionResponse;
         }
 
@@ -162,13 +172,6 @@ namespace OktaDemoAPIServer.Utils {
             }
 
             return results;
-        }
-
-        public static void HandleAuth() {
-            String url = String.Format("https://{0}/oauth2/{1}/v1/authorize?response_type=token&client_id={2}&redirect_uri={3}&scope=Read&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj&response_mode=form_post&prompt=none", oktaOrg, oktaOAuthIssuerId, oktaOAuthClientId, oktaOAuthRedirectUri);
-            String results = GetObjectFromAPI<String>(HttpMethod.Get, url);
-
-            System.Console.WriteLine(results);
         }
 
         public static string Base64Encode(string plainText) {

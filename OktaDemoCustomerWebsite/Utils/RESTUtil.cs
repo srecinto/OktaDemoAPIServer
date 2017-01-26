@@ -18,12 +18,17 @@ namespace OktaDemoCustomerWebsite.Utils {
         private static String apiUrlBase;
         private static String oktaOrg;
         private static String oktaOAuthHeaderAuth;
+        private static String oktaOAuthIssuerId;
+        private static String oktaOAuthClientId;
+        private static String oktaOAuthRedirectUri;
         private static HttpClient client = new HttpClient();
 
         static RESTUtil() {
             apiUrlBase = WebConfigurationManager.AppSettings["apiBaseUri"];
             oktaOrg = WebConfigurationManager.AppSettings["okta:Org"];
-            String oktaOAuthClientId = WebConfigurationManager.AppSettings["okta:OAuthClientId"];
+            oktaOAuthIssuerId = WebConfigurationManager.AppSettings["okta:OAuthIssuerId"];
+            oktaOAuthClientId = WebConfigurationManager.AppSettings["okta:OAuthClientId"];
+            oktaOAuthRedirectUri = WebConfigurationManager.AppSettings["okta:OAuthRedirectUri"];
             String oktaOAuthSecret = WebConfigurationManager.AppSettings["okta:OAuthSecret"];
 
             oktaOAuthHeaderAuth = Base64Encode(String.Format("{0}:{1}", oktaOAuthClientId, oktaOAuthSecret));
@@ -45,6 +50,24 @@ namespace OktaDemoCustomerWebsite.Utils {
             result = GetObjectFromAPI<Customer>(HttpMethod.Get, String.Format("{0}/api/customer/{1}", apiUrlBase, customerId), oAuthToken);
 
             return result;
+        }
+
+        public static String GetAuthorizationURL(String oktaSessionId) {
+
+            return String.Format("https://{0}/oauth2/{1}/v1/authorize?response_type=code&client_id={2}&redirect_uri={3}/Home/AuthCode&scope=Read&state=af0ifjsldkj&nonce=n-0S6_WzA2Mj&sessionToken={4}",
+                                oktaOrg,
+                                oktaOAuthIssuerId,
+                                oktaOAuthClientId,
+                                oktaOAuthRedirectUri,
+                                oktaSessionId);
+        }
+
+        public static String GetTokenURL(String oidcCode) {
+            return String.Format("https://{0}/oauth2/{1}/v1/token?grant_type=authorization_code&code={2}&redirect_uri={3}/Home/AuthCode",
+                                oktaOrg,
+                                oktaOAuthIssuerId,
+                                oidcCode,
+                                oktaOAuthRedirectUri);
         }
 
         private static HttpRequestMessage CreateBaseRequest(HttpMethod method, String uri, object model, String authHeader) {
