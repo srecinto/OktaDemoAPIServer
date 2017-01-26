@@ -20,7 +20,7 @@ namespace OktaDemoCustomerWebsite.Controllers
             if(response.IsAuthenticated) {
                 String oAuthToken = (String)Session[RESTUtil.OKTA_OIDC_TOKEN];
                 if (oAuthToken != null) {
-                    ViewBag.Customers = RESTUtil.GetCustomers(oAuthToken);
+                    ViewBag.CurrentUser = RESTUtil.GetCurrentUser(oktaSession.UserId, oAuthToken);
                 }
             }
             

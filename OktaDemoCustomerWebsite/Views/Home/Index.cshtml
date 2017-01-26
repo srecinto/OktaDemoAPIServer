@@ -40,7 +40,19 @@
             Called Okta Demo API Server and now showing results
         </div>
         <div>
-            Customers: @(ViewBag.Customers.Length)
+            My Account: 
+        </div>
+        <div>
+            Name: @(ViewBag.CurrentUser.Profile.FirstName) @(ViewBag.CurrentUser.Profile.LastName)
+        </div>
+        <div>
+            Email: @(ViewBag.CurrentUser.Profile.Email)
+        </div>
+        <div>
+            Membership Type: @(ViewBag.CurrentUser.Profile.Type)
+        </div>
+        <div>
+            Loyalty Points: @(ViewBag.CurrentUser.Profile.LoyaltyPoints)
         </div>
     }
 </body>

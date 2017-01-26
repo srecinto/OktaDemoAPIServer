@@ -40,11 +40,11 @@ namespace OktaDemoCustomerWebsite.Utils {
             return tokenResponse;
         }
 
-        public static Customer[] GetCustomers(String oAuthToken) {
-            Customer[] results = { };
-            results = GetObjectsFromAPI<Customer>(HttpMethod.Get, String.Format("{0}/api/customer", apiUrlBase), oAuthToken);
+        public static Customer GetCurrentUser(String customerId, String oAuthToken) {
+            Customer result = null;
+            result = GetObjectFromAPI<Customer>(HttpMethod.Get, String.Format("{0}/api/customer/{1}", apiUrlBase, customerId), oAuthToken);
 
-            return results;
+            return result;
         }
 
         private static HttpRequestMessage CreateBaseRequest(HttpMethod method, String uri, object model, String authHeader) {
