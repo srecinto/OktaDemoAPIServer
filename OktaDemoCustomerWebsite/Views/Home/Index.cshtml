@@ -1,0 +1,47 @@
+﻿@using OktaDemoCustomerWebsite.Utils
+@model OktaDemoCustomerWebsite.Models.Login
+@{
+    Layout = null;
+    bool isAuthenticated = Model.IsAuthenticated;
+    String token = (String) Session[RESTUtil.OKTA_OIDC_TOKEN];
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Okta Demo Customer Website</title>
+</head>
+<body>
+    <div>
+        Hello! This is a sample customer Website that will call an API protected by Okta's API Access Management
+    </div>
+    @if (!isAuthenticated) {
+        using (Html.BeginForm()) {
+            @Html.ValidationSummary(true, "Login failed. Check your login details.");
+            <div>
+                Login
+            </div>
+            <div>
+                @Html.LabelFor(m => m.UserName): @Html.TextBoxFor(m => m.UserName)
+                @Html.ValidationMessageFor(m => m.UserName)
+            </div>
+            <div>
+                @Html.LabelFor(m => m.Password): @Html.PasswordFor(m => m.Password)
+                @Html.ValidationMessageFor(m => m.Password)
+            </div>
+            <div>
+                <input type="submit" value="Login" />
+            </div>
+        }
+    } else {
+        <div>
+            Called Okta Demo API Server and now showing results
+        </div>
+        <div>
+            Customers: @(ViewBag.Customers.Length)
+        </div>
+    }
+</body>
+</html>

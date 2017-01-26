@@ -4,10 +4,11 @@ using System.Web.Http;
 
 using OktaDemoAPIServer.Models;
 using OktaDemoAPIServer.Utils;
-
+using System.Web.Http.Controllers;
 
 namespace OktaDemoAPIServer.Controllers
 {
+    [CustomerAuthorization]
     public class CustomerController : ApiController {
 
         // GET: api/Customer
@@ -38,5 +39,6 @@ namespace OktaDemoAPIServer.Controllers
         {
             // Not Implementing
         }
+
     }
 }
