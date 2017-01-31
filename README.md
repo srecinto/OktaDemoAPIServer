@@ -37,7 +37,9 @@ Build your code
 
 Run
 
-Use Postman or any other HTTP requester (including your browser) to you localhost:<port>/api/customer
-i.e. http://localhost:59270/api/customer/
+Open your browser and navigate to the URL for the local "Okta Demo Customer Website"
+i.e. http://localhost:59142/
 
-You should see a list of Okta users displayed
+A webpage with a username and passwourd should appear.
+
+Login with your Okta Credentials and you should see details on your account

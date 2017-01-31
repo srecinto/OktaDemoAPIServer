@@ -8,5 +8,8 @@ namespace OktaDemoAPIServer.Models {
         [DataMember(Name = "sessionToken")]
         public String SessionToken { get; set; }
 
+        [DataMember(Name = "_embedded")]
+        public Embedded Embedded { get; set; }
+
     }
 }

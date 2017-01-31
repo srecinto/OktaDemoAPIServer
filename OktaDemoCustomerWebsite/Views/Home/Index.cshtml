@@ -3,7 +3,7 @@
 @{
     Layout = null;
     bool isAuthenticated = Model.IsAuthenticated;
-    String token = (String) Session[RESTUtil.OKTA_OIDC_TOKEN];
+    String token = RESTUtil.GetOAuthTokenFromHeader(Response);
 }
 
 <!DOCTYPE html>
@@ -53,6 +53,9 @@
         </div>
         <div>
             Loyalty Points: @(ViewBag.CurrentUser.Profile.LoyaltyPoints)
+        </div>
+        <div>
+            @Html.ActionLink("Sign Out", "Logout")
         </div>
     }
 </body>

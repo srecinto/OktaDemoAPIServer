@@ -64,12 +64,15 @@ namespace OktaDemoAPIServer.Utils {
         }
 
         public static OktaSessionResponse GetSession(Authentication authentication) {
+            OktaSessionResponse response = new OktaSessionResponse();
             AuthenticationResponse authResponse = GetObjectFromAPI<AuthenticationResponse>(HttpMethod.Post, String.Format("https://{0}/api/v1/authn", oktaOrg), authentication);
-            OktaSessionResponse sess = GetObjectFromAPI<OktaSessionResponse>(HttpMethod.Post, 
-                String.Format("https://{0}/api/v1/sessions?additionalFields=cookieToken", oktaOrg), 
-                authResponse);
 
-            return sess;
+            if(authResponse != null) {
+                response.SessionToken = authResponse.SessionToken;
+                response.UserId = authResponse.Embedded.User.Id;
+            }
+            
+            return response;
         }
 
         public static TokenIntrospectionResponse IntrospectToken(String token) {

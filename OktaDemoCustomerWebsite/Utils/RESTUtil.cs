@@ -7,14 +7,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization.Json;
+using System.Web;
 
 using OktaDemoCustomerWebsite.Models;
 
 namespace OktaDemoCustomerWebsite.Utils {
     public class RESTUtil {
-        public static String OKTA_SESSION = "OKTA_SESSION";
-        public static String OKTA_OIDC_TOKEN = "OKTA_OIDC_TOKEN";
-
         private static String apiUrlBase;
         private static String oktaOrg;
         private static String oktaOAuthHeaderAuth;
@@ -68,6 +66,27 @@ namespace OktaDemoCustomerWebsite.Utils {
                                 oktaOAuthIssuerId,
                                 oidcCode,
                                 oktaOAuthRedirectUri);
+        }
+
+        public static TokenIntrospectionResponse IntrospectToken(String token) {
+            TokenIntrospectionResponse introspectionResponse = GetObjectFromAPI<TokenIntrospectionResponse>(
+                HttpMethod.Post,
+                String.Format("https://{0}/oauth2/{1}/v1/introspect?token={2}&token_type_hint=access_token",
+                              oktaOrg,
+                              oktaOAuthIssuerId,
+                              token),
+                oktaOAuthHeaderAuth);
+            return introspectionResponse;
+        }
+
+        public static void RevokeToken(String token) {
+            GetObjectFromAPI<Object>(
+                HttpMethod.Post,
+                String.Format("https://{0}/oauth2/{1}/v1/revoke?token={2}&token_type_hint=access_token",
+                              oktaOrg,
+                              oktaOAuthIssuerId,
+                              token),
+                oktaOAuthHeaderAuth);
         }
 
         private static HttpRequestMessage CreateBaseRequest(HttpMethod method, String uri, object model, String authHeader) {
@@ -127,11 +146,13 @@ namespace OktaDemoCustomerWebsite.Utils {
             HttpResponseMessage response = client.SendAsync(request).Result;
 
             if (response.IsSuccessStatusCode) {
-                if ("text/html".Equals(response.Content.Headers.ContentType.MediaType)) {
-                    var results = response.Content.ReadAsStringAsync().Result;
-                    Console.WriteLine(results);
-                } else {
-                    result = response.Content.ReadAsAsync<T>().Result;
+                if (response.Content.Headers.ContentType != null) {
+                    if ("text/html".Equals(response.Content.Headers.ContentType.MediaType)) {
+                        var results = response.Content.ReadAsStringAsync().Result;
+                        Console.WriteLine(results);
+                    } else {
+                        result = response.Content.ReadAsAsync<T>().Result;
+                    }
                 }
             } else {
                 var results = response.Content.ReadAsStringAsync().Result;
@@ -158,9 +179,32 @@ namespace OktaDemoCustomerWebsite.Utils {
             return results;
         }
 
-        public static string Base64Encode(string plainText) {
+        public static String Base64Encode(string plainText) {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
             return System.Convert.ToBase64String(plainTextBytes);
+        }
+
+        public static String GetOAuthTokenFromHeader(HttpRequestBase request) {
+            String rawToken = (String)request.Headers["Authorization"];
+            return GetTokenFromRawString(rawToken);
+        }
+
+        public static String GetOAuthTokenFromHeader(HttpResponseBase response) {
+            String rawToken = (String)response.Headers["Authorization"];
+            return GetTokenFromRawString(rawToken);
+        }
+
+        private static String GetTokenFromRawString(String rawToken) {
+            String result = null;
+            if (!String.IsNullOrEmpty(rawToken)) {
+                String[] splitToken = { " " };
+                String[] resultParts = rawToken.Split(splitToken, StringSplitOptions.RemoveEmptyEntries);
+                if (resultParts.Length == 2) {
+                    result = resultParts[1];
+                }
+            }
+
+            return result;
         }
 
     }
